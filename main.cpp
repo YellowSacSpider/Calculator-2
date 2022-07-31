@@ -1,5 +1,7 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
+#include <cstdlib>
 
 enum ops{
     PLUS,
@@ -15,9 +17,60 @@ void advance(char** textptr)
     if((*textptr) != nullptr || (**textptr) == ' ') // ????
         (*textptr)++;
 }
-void parse(std::vector<std::string>& tokens)
+
+int parse(std::vector<std::string>& tokens)
 {
+    int value = 0;
+    
+    for(int i = 0; i < tokens.size(); i++){
+        if(tokens[i] == "*"){
+                if((tokens[i+1] != "+" || tokens[i+1] != "-" || tokens[i+1] != "*" || tokens[i+1] != "/") && !tokens[i+1].empty()){
+                        value = std::atoi(tokens[i-1].c_str()) * std::atoi(tokens[i+1].c_str());
+                        tokens.erase(tokens.begin()+i+1);
+                        tokens.erase(tokens.begin()+i);
+                        tokens[i-1] = static_cast<std::string>(std::to_string(value));
+                        //std::cout << tokens[i-1] << '\n';
+                    }
+        }else if(tokens[i] == "/"){
+                if((tokens[i+1] != "+" || tokens[i+1] != "-" || tokens[i+1] != "*" || tokens[i+1] != "/") && !tokens[i+1].empty()){
+                        value = std::atoi(tokens[i-1].c_str()) / std::atoi(tokens[i+1].c_str());
+                        tokens.erase(tokens.begin()+i+1);
+                        tokens.erase(tokens.begin()+i);
+                        tokens[i-1] = static_cast<std::string>(std::to_string(value));
+                        //std::cout << tokens[i-1] << '\n';
+                }
+        }
+        
+    }
+    
+    // THERE IS GLITCH WITH + and -
+    if(std::find(tokens.begin(), tokens.end(), "*") == tokens.end() && std::find(tokens.begin(), tokens.end(), "/") == tokens.end()){
+        for(int i = 0; i < tokens.size(); i++){
+        if(tokens[i] == "+"){
+                if((tokens[i+1] != "+" || tokens[i+1] != "-" || tokens[i+1] != "*" || tokens[i+1] != "/") && !tokens[i+1].empty()){
+                    value = std::atoi(tokens[i-1].c_str()) + std::atoi(tokens[i+1].c_str());
+                    tokens.erase(tokens.begin()+i+1);
+                    tokens.erase(tokens.begin()+i);
+                    tokens[i-1] = static_cast<std::string>(std::to_string(value));
+                    //std::cout << tokens[i-1] << '\n';
+                }
+        }
+       if(tokens[i] == "-"){
+                if((tokens[i+1] != "+" || tokens[i+1] != "-" || tokens[i+1] != "*" || tokens[i+1] != "/") && !tokens[i+1].empty()){
+                    value = std::atoi(tokens[i-1].c_str()) - std::atoi(tokens[i+1].c_str());
+                    tokens.erase(tokens.begin()+i+1);
+                    tokens.erase(tokens.begin()+i);
+                    tokens[i-1] = static_cast<std::string>(std::to_string(value));
+                    //std::cout << tokens[i-1] << '\n';
+                    }
+                }
+            }
+    }
+    
+    
+        return value;
 }
+
 void check(char** textptr, std::string& token) // to rewrite this śmietnik
 {
     if(**textptr == '\0') 
@@ -87,7 +140,8 @@ void check(char** textptr, std::string& token) // to rewrite this śmietnik
 
 int main()
 {
-    std::string code = "88 * 3 + 5 / 20 + 800";
+    //std::string code = "88 * 3 + 4 / 2 + 800";
+    std::string code = "2*2/2+3";
     char* textptr = &code[0];
     std::string token = "";
     while(true){
@@ -99,7 +153,16 @@ int main()
         check(&textptr, token);
         advance(&textptr);
     }
-    std::cout << tokens[8];
+    while(tokens.size() != 1)
+        parse(tokens);
+        
+    
+    for(const auto& val : tokens){
+        std::cout << val;
+    }
+
+        
+    
  
     return 0;
 }
